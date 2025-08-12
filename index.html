@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kado Online Responsif</title>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --primary-gift-color: #d63031;
+            --secondary-gift-color: #e17055;
+            --ribbon-color: #fdcb6e;
+            --text-color: #2d3436;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+        }
+
+        /* Kontainer utama yang akan mengatur perpindahan adegan */
+        .main-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; /* Menyembunyikan adegan yang di luar layar */
+        }
+
+        /* Gaya umum untuk setiap adegan */
+        .scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform 1.2s cubic-bezier(0.86, 0, 0.07, 1);
+        }
+
+        /* === Pengaturan Slide Horizontal (Kado -> Final) === */
+        #final-wrapper {
+            transform: translateX(100%); /* Wrapper ini yang digeser, bukan scene individual */
+            overflow: hidden; /* Penting untuk scroll vertikal di dalamnya */
+        }
+        
+        .main-container.show-final #gift-scene {
+            transform: translateX(-100%);
+        }
+        .main-container.show-final #final-wrapper {
+            transform: translateX(0);
+        }
+        
+        /* === Pengaturan Slide Vertikal (Final 1 -> Final 2) === */
+        #bonus-scene {
+            transform: translateY(100%); /* Posisi awal di bawah */
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+        }
+        
+        #final-wrapper.show-bonus #final-scene {
+            transform: translateY(-100%); /* Geser scene pertama ke atas */
+        }
+        #final-wrapper.show-bonus #bonus-scene {
+            transform: translateY(0); /* Masukkan scene bonus dari bawah */
+        }
+
+
+        /* === Gaya untuk Adegan Kado (#gift-scene) === */
+        .gift-box {
+            position: relative; width: 200px; height: 150px;
+            cursor: pointer; z-index: 10;
+        }
+        .gift-box.shake { animation: shake 0.5s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .box {
+            position: absolute; bottom: 0; width: 100%; height: 100%;
+            background-color: var(--primary-gift-color);
+        }
+        .box::before {
+            content: ''; position: absolute; width: 30px; height: 100%;
+            background-color: var(--ribbon-color);
+            left: 50%; transform: translateX(-50%);
+        }
+        .lid {
+            position: absolute; top: -30px; left: -15px; width: 230px; height: 40px;
+            background-color: var(--secondary-gift-color);
+            z-index: 10;
+            transition: transform 1s ease-in-out, top 1s ease-in-out, opacity 1s ease-in-out;
+        }
+        .lid::before {
+            content: ''; position: absolute; width: 100%; height: 30px;
+            background-color: var(--ribbon-color);
+            top: 50%; transform: translateY(-50%);
+        }
+        .gift-box.open .lid {
+            transform: rotate(-20deg) translateY(-250px) translateX(-50px);
+            opacity: 0;
+        }
+        #initial-message {
+            position: absolute; font-size: 3em; color: var(--text-color);
+            opacity: 0; transform: translateY(20px) scale(0.5);
+            transition: all 0.5s ease-out 0.8s;
+            z-index: 15; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        #initial-message.show {
+            opacity: 1; transform: translateY(-180px) scale(1);
+        }
+
+        /* === Gaya untuk Adegan Final & Bonus === */
+        #final-scene { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
+        .content-item {
+            opacity: 0; transform: translateY(30px);
+            animation: fadeInContent 0.8s ease-out forwards;
+        }
+        .final-title {
+            font-size: 2.8em; color: var(--text-color); margin-bottom: 20px;
+            text-align: center; animation-delay: 1.2s;
+        }
+        .final-img {
+            max-width: 90%; width: 300px; border-radius: 15px;
+            border: 8px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px; animation-delay: 1.4s;
+        }
+        .final-text {
+            font-size: 1.5em; color: #576574; text-align: center;
+            padding: 0 20px; animation-delay: 1.6s;
+        }
+        @keyframes fadeInContent {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === Partikel === */
+        .particle, .flower-particle { position: absolute; pointer-events: none; }
+        .particle { background: #ffeaa7; border-radius: 50%; animation: pop 0.6s ease-out forwards; }
+        @keyframes pop {
+            from { transform: scale(1); opacity: 1; } to { transform: scale(0); opacity: 0; }
+        }
+        .flower-particle { font-size: 24px; z-index: 20; }
+        
+        
+        /* === ✨ Tambahan untuk Mobile Responsif ✨ === */
+        @media (max-width: 768px) {
+            /* Kecilkan ukuran kado dan elemen terkait */
+            .gift-box {
+                width: 150px;
+                height: 110px;
+            }
+
+            .lid {
+                width: 180px; /* Lebar kado 150px + 30px */
+                left: -15px;
+            }
+
+            /* Sesuaikan posisi & ukuran font pesan awal */
+            #initial-message {
+                font-size: 2.2em;
+            }
+
+            #initial-message.show {
+                transform: translateY(-140px) scale(1);
+            }
+
+            /* Kecilkan ukuran font dan gambar di adegan final */
+            .final-title {
+                font-size: 2em;
+                padding: 0 15px; /* Beri sedikit ruang di sisi */
+            }
+
+            .final-img {
+                width: 85%; /* Gunakan persentase agar fleksibel */
+                max-width: 260px; /* Batas atas untuk tablet kecil */
+            }
+
+            .final-text {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container" id="mainContainer">
+
+        <div class="scene" id="gift-scene">
+            <h1 id="initial-message">Selamat Semhas Bangg!</h1>
+            <div class="gift-box" id="giftBox">
+                <div class="lid"></div>
+                <div class="box"></div>
+            </div>
+        </div>
+
+        <div class="scene" id="final-wrapper">
+            
+            <div class="scene" id="final-scene">
+                <h1 class="content-item final-title">Selamatt, Indah</h1>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTdBWB76EZKUgHdARYa-XNyIzoiJiUiyKiFrg&s" alt="Foto Spesial" class="content-item final-img">
+                <p class="content-item final-text">Angjay Otw Wisuda Gelombang I</p>
+            </div>
+
+            <div class="scene" id="bonus-scene">
+                <h1 class="content-item final-title">Welcome to the Last Chapter</h1>
+                <img src="https://preview.redd.it/drawing-the-cat-as-random-cat-memes-day-41-original-in-v0-v054lzb6ok0a1.jpg?width=640&crop=smart&auto=webp&s=1fce225a7540ae09b7850c3a3e969b95ef93ed0d" alt="Foto Bonus" class="content-item final-img">
+                <p class="content-item final-text">Semangat ngurus berkas-berkasnya</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const giftBox = document.getElementById('giftBox');
+        const mainContainer = document.getElementById('mainContainer');
+        const initialMessage = document.getElementById('initial-message');
+        const finalWrapper = document.getElementById('final-wrapper');
+        
+        let clickCount = 0;
+        let giftOpened = false;
+
+        giftBox.addEventListener('click', () => {
+            if (giftOpened) return;
+            clickCount++;
+
+            giftBox.classList.add('shake');
+            setTimeout(() => giftBox.classList.remove('shake'), 500);
+
+            if (clickCount === 3) {
+                giftOpened = true;
+                
+                // 1. Buka kado & tampilkan partikel
+                openGift();
+
+                // 2. Geser ke Adegan Final setelah 2.5 detik
+                setTimeout(() => {
+                    mainContainer.classList.add('show-final');
+                }, 2500);
+
+                // 3. Geser ke Adegan Bonus setelah 7.5 detik (2.5 + 5)
+                setTimeout(() => {
+                    finalWrapper.classList.add('show-bonus');
+                }, 7500);
+
+                // 4. Reset semuanya setelah 12.5 detik (7.5 + 5)
+                setTimeout(() => {
+                    resetAnimation();
+                }, 12500);
+            }
+        });
+
+        function openGift() {
+            createParticles(30, 'particle');
+            giftBox.classList.add('open');
+            initialMessage.classList.add('show');
+            setTimeout(() => createParticles(50, 'flower-particle'), 500);
+        }
+
+        function resetAnimation() {
+            // Balikkan semua animasi
+            mainContainer.classList.remove('show-final');
+            finalWrapper.classList.remove('show-bonus');
+            
+            // Tunggu animasi slide selesai sebelum reset state internal
+            setTimeout(() => {
+                giftBox.classList.remove('open');
+                initialMessage.classList.remove('show');
+                clickCount = 0;
+                giftOpened = false;
+            }, 1200); // Sesuaikan dengan durasi transisi
+        }
+
+        function createParticles(count, type) {
+            const flowers = ['🌸', '🌺', '🌻', '🌼', '🌷'];
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add(type);
+                const container = document.getElementById('gift-scene');
+                const startX = container.clientWidth / 2;
+                const startY = container.clientHeight / 2;
+                if (type === 'particle') {
+                    const angle = Math.random() * 360; const distance = Math.random() * 100 + 100;
+                    const x = startX + Math.cos(angle * Math.PI / 180) * distance;
+                    const y = startY + Math.sin(angle * Math.PI / 180) * distance;
+                    const size = Math.random() * 10 + 5;
+                    particle.style.left = `${x}px`; particle.style.top = `${y}px`;
+                    particle.style.width = `${size}px`; particle.style.height = `${size}px`;
+                    document.body.appendChild(particle);
+                    setTimeout(() => particle.remove(), 800);
+                } else {
+                    const angle = Math.random() * Math.PI * 2; const velocity = Math.random() * 150 + 80;
+                    const endX = Math.cos(angle) * velocity;
+                    const endY = Math.sin(angle) * velocity - (Math.random() * 200 + 150);
+                    particle.innerHTML = flowers[Math.floor(Math.random() * flowers.length)];
+                    particle.style.left = `${startX}px`; particle.style.top = `${startY}px`;
+                    const keyframes = `@keyframes burst-${i} { 0% { transform: translate(0, 0) scale(1.2); } 100% { transform: translate(${endX}px, ${endY}px) scale(0.5); opacity: 0; } }`;
+                    const styleSheet = document.createElement("style"); styleSheet.innerText = keyframes;
+                    document.head.appendChild(styleSheet);
+                    particle.style.animation = `burst-${i} 2s ${Math.random() * 0.4}s ease-out forwards`;
+                    container.appendChild(particle);
+                    setTimeout(() => { particle.remove(); styleSheet.remove(); }, 2400);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
