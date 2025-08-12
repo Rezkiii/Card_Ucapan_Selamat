@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kado Online </title>
+    <title>Kado Online dengan Animasi Unik</title>
     <style>
         :root {
             --bg-color: #f0f4f8;
@@ -19,15 +19,13 @@
             background-color: var(--bg-color);
         }
 
-        /* Kontainer utama yang akan mengatur perpindahan adegan */
         .main-container {
             position: relative;
             width: 100vw;
             height: 100vh;
-            overflow: hidden; /* Menyembunyikan adegan yang di luar layar */
+            overflow: hidden;
         }
 
-        /* Gaya umum untuk setiap adegan */
         .scene {
             position: absolute;
             top: 0;
@@ -41,43 +39,35 @@
             transition: transform 1.2s cubic-bezier(0.86, 0, 0.07, 1);
         }
 
-        /* === Pengaturan Slide Horizontal (Kado -> Final) === */
-        #final-wrapper {
-            transform: translateX(100%); /* Wrapper ini yang digeser, bukan scene individual */
-            overflow: hidden; /* Penting untuk scroll vertikal di dalamnya */
+        /* === Pengaturan Transisi Adegan === */
+        #final-wrapper, #congrats-scene {
+            transform: translateX(100%);
         }
-        
-        .main-container.show-final #gift-scene {
-            transform: translateX(-100%);
-        }
-        .main-container.show-final #final-wrapper {
-            transform: translateX(0);
-        }
-        
-        /* === Pengaturan Slide Vertikal (Final 1 -> Final 2) === */
+
+        /* 1. Kado -> Final Wrapper */
+        .main-container.show-final #gift-scene { transform: translateX(-100%); }
+        .main-container.show-final #final-wrapper { transform: translateX(0); }
+
+        /* 2. Final Wrapper -> Congrats Scene */
+        .main-container.show-congrats #final-wrapper { transform: translateX(-100%); }
+        .main-container.show-congrats #congrats-scene { transform: translateX(0); }
+
+        /* === Pengaturan Slide Vertikal (Final 1 -> Bonus) === */
         #bonus-scene {
-            transform: translateY(100%); /* Posisi awal di bawah */
+            transform: translateY(100%);
             background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
         }
-        
-        #final-wrapper.show-bonus #final-scene {
-            transform: translateY(-100%); /* Geser scene pertama ke atas */
-        }
-        #final-wrapper.show-bonus #bonus-scene {
-            transform: translateY(0); /* Masukkan scene bonus dari bawah */
-        }
+        #final-wrapper.show-bonus #final-scene { transform: translateY(-100%); }
+        #final-wrapper.show-bonus #bonus-scene { transform: translateY(0); }
 
-
-        /* === Gaya untuk Adegan Kado (#gift-scene) === */
+        /* === Gaya Adegan Kado === */
         .gift-box {
             position: relative; width: 200px; height: 150px;
             cursor: pointer; z-index: 10;
         }
         .gift-box.shake { animation: shake 0.5s; }
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
+            0%,100%{transform:translateX(0)}10%,30%,50%,70%,90%{transform:translateX(-5px)}20%,40%,60%,80%{transform:translateX(5px)}
         }
         .box {
             position: absolute; bottom: 0; width: 100%; height: 100%;
@@ -108,12 +98,19 @@
             opacity: 0; transform: translateY(20px) scale(0.5);
             transition: all 0.5s ease-out 0.8s;
             z-index: 15; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
         }
         #initial-message.show {
             opacity: 1; transform: translateY(-180px) scale(1);
         }
+        /* ✨ ANIMASI BARU: Teks terbang masuk ke kado ✨ */
+        #initial-message.fly-in {
+            transition: transform 0.8s cubic-bezier(0.5, -0.5, 1, 1), opacity 0.5s ease-out;
+            transform: translateY(0px) scale(0.2);
+            opacity: 0;
+        }
 
-        /* === Gaya untuk Adegan Final & Bonus === */
+        /* === Gaya Adegan Final & Bonus === */
         #final-scene { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
         .content-item {
             opacity: 0; transform: translateY(30px);
@@ -132,59 +129,54 @@
             font-size: 1.5em; color: #576574; text-align: center;
             padding: 0 20px; animation-delay: 1.6s;
         }
-        @keyframes fadeInContent {
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeInContent { to { opacity: 1; transform: translateY(0); } }
+
+        /* === Gaya Adegan Selamat (#congrats-scene) === */
+        #congrats-scene { background: #fff; }
+        #congrats-text {
+            font-size: 4em; color: var(--text-color);
+            text-align: center;
+            transition: opacity 0.5s ease-out;
+        }
+        #cat-particle-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; pointer-events: none;
         }
 
-        /* === Partikel === */
-        .particle, .flower-particle { position: absolute; pointer-events: none; }
+        /* === Gaya Partikel === */
+        .particle, .flower-particle, .cat-particle { position: absolute; pointer-events: none; }
         .particle { background: #ffeaa7; border-radius: 50%; animation: pop 0.6s ease-out forwards; }
-        @keyframes pop {
-            from { transform: scale(1); opacity: 1; } to { transform: scale(0); opacity: 0; }
-        }
+        @keyframes pop { from{transform:scale(1);opacity:1}to{transform:scale(0);opacity:0} }
         .flower-particle { font-size: 24px; z-index: 20; }
+        .cat-particle {
+            font-size: 2rem;
+            animation: fallAndFade 3s ease-in forwards;
+        }
+        @keyframes fallAndFade {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
         
-        
-        /* === ✨ Tambahan untuk Mobile Responsif ✨ === */
+        /* === Mobile Responsif === */
         @media (max-width: 768px) {
-            /* Kecilkan ukuran kado dan elemen terkait */
-            .gift-box {
-                width: 150px;
-                height: 110px;
-            }
-
-            .lid {
-                width: 180px; /* Lebar kado 150px + 30px */
-                left: -15px;
-            }
-
-            /* Sesuaikan posisi & ukuran font pesan awal */
+            .gift-box { width: 150px; height: 110px; }
+            .lid { width: 180px; left: -15px; }
             #initial-message {
-                font-size: 2.2em;
+                font-size: 2.2em; width: 90%;
+                left: 50%; transform: translateX(-50%) translateY(20px) scale(0.5);
             }
-
-            #initial-message.show {
-                transform: translateY(-140px) scale(1);
-            }
-
-            /* Kecilkan ukuran font dan gambar di adegan final */
-            .final-title {
-                font-size: 2em;
-                padding: 0 15px; /* Beri sedikit ruang di sisi */
-            }
-
-            .final-img {
-                width: 85%; /* Gunakan persentase agar fleksibel */
-                max-width: 260px; /* Batas atas untuk tablet kecil */
-            }
-
-            .final-text {
-                font-size: 1.2em;
-            }
+            #initial-message.show { transform: translateX(-50%) translateY(-140px) scale(1); }
+            #initial-message.fly-in { transform: translateX(-50%) translateY(0px) scale(0.2); }
+            .final-title { font-size: 2em; padding: 0 15px; }
+            .final-img { width: 85%; max-width: 260px; }
+            .final-text { font-size: 1.2em; }
+            #congrats-text { font-size: 2.5em; padding: 0 15px; }
         }
     </style>
 </head>
 <body>
+
+    <audio id="background-song" src="song.mp4" loop></audio>
 
     <div class="main-container" id="mainContainer">
 
@@ -197,20 +189,23 @@
         </div>
 
         <div class="scene" id="final-wrapper">
-            
             <div class="scene" id="final-scene">
-                <h1 class="content-item final-title">Selamatt, Indah</h1>
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTdBWB76EZKUgHdARYa-XNyIzoiJiUiyKiFrg&s" alt="Foto Spesial" class="content-item final-img">
+                <h1 class="content-item final-title">Selamat, Indah</h1>
+                <img src="https://i.pinimg.com/736x/d1/97/77/d1977749e95f9448b58cd0c5c630ec2e.jpg" alt="Foto Spesial" class="content-item final-img">
                 <p class="content-item final-text">Angjay Otw Wisuda Gelombang I</p>
             </div>
-
             <div class="scene" id="bonus-scene">
-                <h1 class="content-item final-title">Welcome to the Last Chapter</h1>
-                <img src="https://preview.redd.it/drawing-the-cat-as-random-cat-memes-day-41-original-in-v0-v054lzb6ok0a1.jpg?width=640&crop=smart&auto=webp&s=1fce225a7540ae09b7850c3a3e969b95ef93ed0d" alt="Foto Bonus" class="content-item final-img">
-                <p class="content-item final-text">Semangat ngurus berkas-berkasnya</p>
+                <h1 class="content-item final-title">Tidak Terasa Sudah Masuk Chapter Terakhir</h1>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8v-1WayVpiUYJooxuKP4ncBiiDQS4ciElJA&s" alt="Foto Bonus" class="content-item final-img">
+                <p class="content-item final-text">Semangat yak ngurus berkas wisudanya</p>
             </div>
-
         </div>
+
+        <div class="scene" id="congrats-scene">
+            <h2 id="congrats-text">Selamat Semhas!</h2>
+            <div id="cat-particle-container"></div>
+        </div>
+
     </div>
 
     <script>
@@ -218,6 +213,9 @@
         const mainContainer = document.getElementById('mainContainer');
         const initialMessage = document.getElementById('initial-message');
         const finalWrapper = document.getElementById('final-wrapper');
+        const congratsText = document.getElementById('congrats-text');
+        const catParticleContainer = document.getElementById('cat-particle-container');
+        const backgroundSong = document.getElementById('background-song');
         
         let clickCount = 0;
         let giftOpened = false;
@@ -232,45 +230,81 @@
             if (clickCount === 3) {
                 giftOpened = true;
                 
-                // 1. Buka kado & tampilkan partikel
-                openGift();
+                // Urutan animasi otomatis
+                openGift(); // Time 0
 
-                // 2. Geser ke Adegan Final setelah 2.5 detik
-                setTimeout(() => {
-                    mainContainer.classList.add('show-final');
-                }, 2500);
+                // Time 2.5s -> Adegan Final 1
+                setTimeout(() => mainContainer.classList.add('show-final'), 2500);
 
-                // 3. Geser ke Adegan Bonus setelah 7.5 detik (2.5 + 5)
-                setTimeout(() => {
-                    finalWrapper.classList.add('show-bonus');
-                }, 7500);
+                // Time 7.5s (2.5 + 5) -> Adegan Bonus
+                setTimeout(() => finalWrapper.classList.add('show-bonus'), 7500);
 
-                // 4. Reset semuanya setelah 12.5 detik (7.5 + 5)
+                // Time 12.5s (7.5 + 5) -> Adegan Selamat Semhas
+                setTimeout(() => mainContainer.classList.add('show-congrats'), 11500);
+                
+                // Time 22.5s (12.5 + 10) -> Hujan Kucing
                 setTimeout(() => {
-                    resetAnimation();
-                }, 12500);
+                    triggerCatRain();
+                    // Mulai proses kembali ke kado setelah hujan kucing selesai
+                    setTimeout(() => resetAnimation(), 2500); // Waktu untuk menikmati hujan kucing
+                }, 20500);
             }
         });
 
         function openGift() {
+            backgroundSong.play();
             createParticles(30, 'particle');
             giftBox.classList.add('open');
             initialMessage.classList.add('show');
             setTimeout(() => createParticles(50, 'flower-particle'), 500);
         }
 
+        function triggerCatRain() {
+            congratsText.style.opacity = '0';
+            const catEmojis = ['🐱', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'];
+            const rainInterval = setInterval(() => {
+                const particle = document.createElement('div');
+                particle.classList.add('cat-particle');
+                particle.innerText = catEmojis[Math.floor(Math.random() * catEmojis.length)];
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.animationDelay = `${Math.random() * 0.5}s`;
+                catParticleContainer.appendChild(particle);
+                setTimeout(() => particle.remove(), 3000);
+            }, 80);
+
+            setTimeout(() => clearInterval(rainInterval), 2500);
+        }
+
         function resetAnimation() {
-            // Balikkan semua animasi
-            mainContainer.classList.remove('show-final');
+            backgroundSong.pause();
+            backgroundSong.currentTime = 0;
+
+            mainContainer.classList.remove('show-final', 'show-congrats');
             finalWrapper.classList.remove('show-bonus');
             
-            // Tunggu animasi slide selesai sebelum reset state internal
+            // Urutan animasi penutupan kado
             setTimeout(() => {
-                giftBox.classList.remove('open');
-                initialMessage.classList.remove('show');
-                clickCount = 0;
-                giftOpened = false;
-            }, 1200); // Sesuaikan dengan durasi transisi
+                // Teks "Selamat" harus terlihat dulu sebelum terbang masuk
+                initialMessage.classList.add('show');
+
+                setTimeout(() => {
+                    // Tambahkan kelas .fly-in untuk menganimasikan teks masuk ke kado
+                    initialMessage.classList.add('fly-in');
+
+                    setTimeout(() => {
+                        // Tutup kado setelah teks masuk
+                        giftBox.classList.remove('open');
+
+                        setTimeout(() => {
+                            // Reset semua state setelah kado tertutup
+                            initialMessage.classList.remove('show', 'fly-in');
+                            congratsText.style.opacity = '1';
+                            clickCount = 0;
+                            giftOpened = false;
+                        }, 1000); // Waktu animasi tutup kado
+                    }, 800); // Waktu animasi teks masuk
+                }, 500); // Tahan teks sebentar sebelum masuk
+            }, 1000); // Waktu animasi slide kembali
         }
 
         function createParticles(count, type) {
