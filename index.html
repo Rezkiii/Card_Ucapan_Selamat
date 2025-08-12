@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kado Online dengan Animasi Unik</title>
+    <title>Kado Online dengan Musik</title>
     <style>
         :root {
             --bg-color: #f0f4f8;
@@ -103,7 +103,6 @@
         #initial-message.show {
             opacity: 1; transform: translateY(-180px) scale(1);
         }
-        /* ✨ ANIMASI BARU: Teks terbang masuk ke kado ✨ */
         #initial-message.fly-in {
             transition: transform 0.8s cubic-bezier(0.5, -0.5, 1, 1), opacity 0.5s ease-out;
             transform: translateY(0px) scale(0.2);
@@ -176,7 +175,7 @@
 </head>
 <body>
 
-    <audio id="background-song" src="song.mp4" loop></audio>
+    <audio id="background-song" src="song.mp3" loop></audio>
 
     <div class="main-container" id="mainContainer">
 
@@ -190,14 +189,14 @@
 
         <div class="scene" id="final-wrapper">
             <div class="scene" id="final-scene">
-                <h1 class="content-item final-title">Selamat, Indah</h1>
-                <img src="https://i.pinimg.com/736x/d1/97/77/d1977749e95f9448b58cd0c5c630ec2e.jpg" alt="Foto Spesial" class="content-item final-img">
+                <h1 class="content-item final-title">Nama</h1>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTdBWB76EZKUgHdARYa-XNyIzoiJiUiyKiFrg&s" alt="Foto Spesial" class="content-item final-img">
                 <p class="content-item final-text">Angjay Otw Wisuda Gelombang I</p>
             </div>
             <div class="scene" id="bonus-scene">
-                <h1 class="content-item final-title">Tidak Terasa Sudah Masuk Chapter Terakhir</h1>
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8v-1WayVpiUYJooxuKP4ncBiiDQS4ciElJA&s" alt="Foto Bonus" class="content-item final-img">
-                <p class="content-item final-text">Semangat yak ngurus berkas wisudanya</p>
+                <h1 class="content-item final-title">Bonus Track! 🤪</h1>
+                <img src="https://i.ibb.co/yhzFV0S/cute-cat.jpg" alt="Foto Bonus" class="content-item final-img">
+                <p class="content-item final-text">Sukses selalu untuk ke depannya!</p>
             </div>
         </div>
 
@@ -222,6 +221,16 @@
 
         giftBox.addEventListener('click', () => {
             if (giftOpened) return;
+
+            // ✨ PERBAIKAN: "Buka Kunci" audio pada klik pertama
+            if (clickCount === 0) {
+                backgroundSong.play().then(() => {
+                    backgroundSong.pause();
+                }).catch(error => {
+                    // Abaikan error jika user belum berinteraksi
+                });
+            }
+
             clickCount++;
 
             giftBox.classList.add('shake');
@@ -230,24 +239,18 @@
             if (clickCount === 3) {
                 giftOpened = true;
                 
-                // Urutan animasi otomatis
-                openGift(); // Time 0
+                openGift();
 
-                // Time 2.5s -> Adegan Final 1
                 setTimeout(() => mainContainer.classList.add('show-final'), 2500);
 
-                // Time 7.5s (2.5 + 5) -> Adegan Bonus
                 setTimeout(() => finalWrapper.classList.add('show-bonus'), 7500);
 
-                // Time 12.5s (7.5 + 5) -> Adegan Selamat Semhas
-                setTimeout(() => mainContainer.classList.add('show-congrats'), 11500);
+                setTimeout(() => mainContainer.classList.add('show-congrats'), 12500);
                 
-                // Time 22.5s (12.5 + 10) -> Hujan Kucing
                 setTimeout(() => {
                     triggerCatRain();
-                    // Mulai proses kembali ke kado setelah hujan kucing selesai
-                    setTimeout(() => resetAnimation(), 2500); // Waktu untuk menikmati hujan kucing
-                }, 20500);
+                    setTimeout(() => resetAnimation(), 3000);
+                }, 22500);
             }
         });
 
@@ -282,29 +285,24 @@
             mainContainer.classList.remove('show-final', 'show-congrats');
             finalWrapper.classList.remove('show-bonus');
             
-            // Urutan animasi penutupan kado
             setTimeout(() => {
-                // Teks "Selamat" harus terlihat dulu sebelum terbang masuk
                 initialMessage.classList.add('show');
 
                 setTimeout(() => {
-                    // Tambahkan kelas .fly-in untuk menganimasikan teks masuk ke kado
                     initialMessage.classList.add('fly-in');
 
                     setTimeout(() => {
-                        // Tutup kado setelah teks masuk
                         giftBox.classList.remove('open');
 
                         setTimeout(() => {
-                            // Reset semua state setelah kado tertutup
                             initialMessage.classList.remove('show', 'fly-in');
                             congratsText.style.opacity = '1';
                             clickCount = 0;
                             giftOpened = false;
-                        }, 1000); // Waktu animasi tutup kado
-                    }, 800); // Waktu animasi teks masuk
-                }, 500); // Tahan teks sebentar sebelum masuk
-            }, 1000); // Waktu animasi slide kembali
+                        }, 1000);
+                    }, 800);
+                }, 500);
+            }, 1200);
         }
 
         function createParticles(count, type) {
